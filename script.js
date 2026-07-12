@@ -3,7 +3,6 @@ const gameState = {
     cookies: 0,
     perClick: 1,
     perSecond: 0,
-    clickPowerUpgrades: 0, // Track number of click power upgrades purchased
     upgrades: [
         {
             id: 'doubleClick',
@@ -68,6 +67,62 @@ const gameState = {
             cost: 5000,
             owned: 0,
             effect: () => gameState.perClick += 19
+        },
+        {
+            id: 'netherStar',
+            name: 'Nether Star',
+            description: 'Each click gives 30 cookies',
+            cost: 10000,
+            owned: 0,
+            effect: () => gameState.perClick += 29
+        },
+        {
+            id: 'beaconTower',
+            name: 'Beacon Tower',
+            description: '+20 cookies per second',
+            cost: 15000,
+            owned: 0,
+            effect: () => gameState.perSecond += 20
+        },
+        {
+            id: 'witherBoss',
+            name: 'Wither Boss',
+            description: 'Each click gives 50 cookies',
+            cost: 25000,
+            owned: 0,
+            effect: () => gameState.perClick += 49
+        },
+        {
+            id: 'dragonEgg',
+            name: 'Dragon Egg',
+            description: '+30 cookies per second',
+            cost: 40000,
+            owned: 0,
+            effect: () => gameState.perSecond += 30
+        },
+        {
+            id: 'netheriteBlock',
+            name: 'Netherite Block',
+            description: 'Each click gives 75 cookies',
+            cost: 60000,
+            owned: 0,
+            effect: () => gameState.perClick += 74
+        },
+        {
+            id: 'endPortalFrame',
+            name: 'End Portal Frame',
+            description: '+50 cookies per second',
+            cost: 100000,
+            owned: 0,
+            effect: () => gameState.perSecond += 50
+        },
+        {
+            id: 'supremeArtifact',
+            name: 'Supreme Artifact',
+            description: 'Each click gives 100 cookies',
+            cost: 150000,
+            owned: 0,
+            effect: () => gameState.perClick += 99
         }
     ]
 };
@@ -147,37 +202,10 @@ function startAutoClicker() {
     }, 1000);
 }
 
-// Calculate Click Power Upgrade Cost
-function getClickPowerUpgradeCost() {
-    return 50 + (gameState.clickPowerUpgrades * 50);
-}
-
 // Render Upgrades
 function renderUpgrades() {
     upgradesContainer.innerHTML = '';
     
-    // Add Click Power Upgrade Button
-    const clickPowerButton = document.createElement('button');
-    clickPowerButton.className = 'upgrade-button click-power-button';
-    clickPowerButton.id = 'upgrade-clickPower';
-    
-    const nextClickPowerCost = getClickPowerUpgradeCost();
-    const canAffordClickPower = gameState.cookies >= nextClickPowerCost;
-    clickPowerButton.disabled = !canAffordClickPower;
-    
-    const nextClickPowerAmount = 10 + (gameState.clickPowerUpgrades * 10);
-    
-    clickPowerButton.innerHTML = `
-        <span class="upgrade-name">💪 Click Power Upgrade</span>
-        <span class="upgrade-description">+${nextClickPowerAmount} cookies per click</span>
-        <span class="upgrade-cost">Cost: ${nextClickPowerCost} 🍪</span>
-        <span class="upgrade-owned">Upgrades Purchased: ${gameState.clickPowerUpgrades}</span>
-    `;
-    
-    clickPowerButton.addEventListener('click', () => buyClickPowerUpgrade());
-    upgradesContainer.appendChild(clickPowerButton);
-    
-    // Add regular upgrades
     gameState.upgrades.forEach(upgrade => {
         const button = document.createElement('button');
         button.className = 'upgrade-button';
@@ -189,31 +217,13 @@ function renderUpgrades() {
         button.innerHTML = `
             <span class="upgrade-name">${upgrade.name}</span>
             <span class="upgrade-description">${upgrade.description}</span>
-            <span class="upgrade-cost">Cost: ${upgrade.cost} 🍪</span>
+            <span class="upgrade-cost">Cost: ${formatNumber(upgrade.cost)} 🍪</span>
             <span class="upgrade-owned">Owned: ${upgrade.owned}</span>
         `;
         
         button.addEventListener('click', () => buyUpgrade(upgrade));
         upgradesContainer.appendChild(button);
     });
-}
-
-// Buy Click Power Upgrade
-function buyClickPowerUpgrade() {
-    const cost = getClickPowerUpgradeCost();
-    const powerIncrease = 10 + (gameState.clickPowerUpgrades * 10);
-    
-    if (gameState.cookies >= cost) {
-        gameState.cookies -= cost;
-        gameState.clickPowerUpgrades += 1;
-        gameState.perClick += powerIncrease;
-        
-        updateDisplay();
-        renderUpgrades();
-        
-        // Feedback
-        playBuySound();
-    }
 }
 
 // Buy Upgrade
@@ -276,13 +286,6 @@ function updateDisplay() {
     perSecondDisplay.textContent = gameState.perSecond;
     
     // Update upgrade buttons
-    const clickPowerButton = document.getElementById('upgrade-clickPower');
-    if (clickPowerButton) {
-        const nextClickPowerCost = getClickPowerUpgradeCost();
-        const canAffordClickPower = gameState.cookies >= nextClickPowerCost;
-        clickPowerButton.disabled = !canAffordClickPower;
-    }
-    
     gameState.upgrades.forEach(upgrade => {
         const button = document.getElementById(`upgrade-${upgrade.id}`);
         if (button) {
@@ -309,7 +312,6 @@ function loadGame() {
         gameState.cookies = loaded.cookies;
         gameState.perClick = loaded.perClick;
         gameState.perSecond = loaded.perSecond;
-        gameState.clickPowerUpgrades = loaded.clickPowerUpgrades || 0;
         
         // Restore upgrades
         loaded.upgrades.forEach((loadedUpgrade, index) => {
