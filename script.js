@@ -3,6 +3,8 @@ const gameState = {
     cookies: 0,
     perClick: 1,
     perSecond: 0,
+    rebirthCount: 0,
+    clickMultiplier: 1,
     upgrades: [
         {
             id: 'doubleClick',
@@ -134,6 +136,7 @@ const perClickDisplay = document.getElementById('perClick');
 const perSecondDisplay = document.getElementById('perSecond');
 const upgradesContainer = document.getElementById('upgradesContainer');
 const particleContainer = document.getElementById('particleContainer');
+const gameArea = document.querySelector('.game-area');
 
 // Initialize
 function init() {
@@ -148,9 +151,61 @@ function setupEventListeners() {
     cookieButton.addEventListener('click', clickCookie);
 }
 
+// Calculate rebirth requirement
+function getRebirthRequirement() {
+    return 250000 + (gameState.rebirthCount * 250000);
+}
+
+// Perform Rebirth
+function rebirth() {
+    const requirement = getRebirthRequirement();
+    if (gameState.cookies >= requirement) {
+        // Create rebirth animation
+        createRebirthAnimation();
+        
+        // Reset cookies and upgrades
+        gameState.cookies = 0;
+        gameState.perClick = 1;
+        gameState.perSecond = 0;
+        gameState.rebirthCount += 1;
+        gameState.clickMultiplier += 0.25;
+        
+        // Reset all upgrades
+        gameState.upgrades.forEach(upgrade => {
+            upgrade.owned = 0;
+        });
+        
+        updateDisplay();
+        renderUpgrades();
+        playBuySound();
+    }
+}
+
+// Create Rebirth Animation
+function createRebirthAnimation() {
+    for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+            const particle = document.createElement('div');
+            particle.className = 'rebirth-particle';
+            particle.textContent = '✨';
+            
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight;
+            
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            
+            document.body.appendChild(particle);
+            
+            setTimeout(() => particle.remove(), 1000);
+        }, i * 30);
+    }
+}
+
 // Click Cookie
 function clickCookie(e) {
-    gameState.cookies += gameState.perClick;
+    const clickValue = gameState.perClick * gameState.clickMultiplier;
+    gameState.cookies += clickValue;
     
     // Create particles
     createParticles(e);
@@ -164,31 +219,34 @@ function clickCookie(e) {
     updateDisplay();
 }
 
-// Create Floating Particles
+// Create Floating Particles with Mini Cookies
 function createParticles(e) {
     const rect = cookieButton.getBoundingClientRect();
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
 
-    for (let i = 0; i < 5; i++) {
+    // Create 8 particles instead of 5 for more visual effect
+    for (let i = 0; i < 8; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
         particle.textContent = '🍪';
         
-        const angle = (Math.PI * 2 * i) / 5;
-        const distance = 50;
+        const angle = (Math.PI * 2 * i) / 8;
+        const distance = 60;
         const tx = Math.cos(angle) * distance;
         const ty = Math.sin(angle) * distance;
         
         particle.style.left = x + 'px';
         particle.style.top = y + 'px';
         particle.style.setProperty('--tx', tx + 'px');
+        particle.style.setProperty('--ty', ty + 'px');
+        particle.style.fontSize = (20 + Math.random() * 30) + 'px';
         
         particleContainer.appendChild(particle);
         
         setTimeout(() => {
             particle.remove();
-        }, 1000);
+        }, 1200);
     }
 }
 
@@ -196,7 +254,8 @@ function createParticles(e) {
 function startAutoClicker() {
     setInterval(() => {
         if (gameState.perSecond > 0) {
-            gameState.cookies += gameState.perSecond;
+            const perSecondValue = gameState.perSecond * gameState.clickMultiplier;
+            gameState.cookies += perSecondValue;
             updateDisplay();
         }
     }, 1000);
@@ -206,6 +265,33 @@ function startAutoClicker() {
 function renderUpgrades() {
     upgradesContainer.innerHTML = '';
     
+    // Add Rebirth Button
+    const rebirthRequirement = getRebirthRequirement();
+    const rebirthButton = document.createElement('button');
+    rebirthButton.className = 'rebirth-button';
+    rebirthButton.id = 'rebirth-button';
+    
+    const canRebirth = gameState.cookies >= rebirthRequirement;
+    rebirthButton.disabled = !canRebirth;
+    
+    rebirthButton.innerHTML = `
+        <span class="upgrade-name">🔄 Rebirth</span>
+        <span class="upgrade-description">Reset progress for x${(gameState.clickMultiplier + 0.25).toFixed(2)} click multiplier</span>
+        <span class="upgrade-cost">Cost: ${formatNumber(rebirthRequirement)} 🍪</span>
+        <span class="upgrade-owned">Rebirths: ${gameState.rebirthCount} | Current Multiplier: x${gameState.clickMultiplier.toFixed(2)}</span>
+    `;
+    
+    rebirthButton.addEventListener('click', rebirth);
+    upgradesContainer.appendChild(rebirthButton);
+    
+    // Add separator
+    const separator = document.createElement('div');
+    separator.style.height = '2px';
+    separator.style.background = 'rgba(218, 165, 32, 0.3)';
+    separator.style.margin = '10px 0';
+    upgradesContainer.appendChild(separator);
+    
+    // Add regular upgrades
     gameState.upgrades.forEach(upgrade => {
         const button = document.createElement('button');
         button.className = 'upgrade-button';
@@ -261,7 +347,7 @@ function playBuySound() {
     setTimeout(() => pulse.remove(), 600);
 }
 
-// Add pulse animation
+// Add animations
 const style = document.createElement('style');
 style.textContent = `
     @keyframes pulse {
@@ -276,14 +362,32 @@ style.textContent = `
             opacity: 0;
         }
     }
+    
+    @keyframes rebirthPulse {
+        0% {
+            opacity: 1;
+            transform: translate(0, 0) scale(1);
+        }
+        100% {
+            opacity: 0;
+            transform: translate(var(--rx), var(--ry)) scale(0);
+        }
+    }
 `;
 document.head.appendChild(style);
 
 // Update Display
 function updateDisplay() {
-    cookieCountDisplay.textContent = formatNumber(gameState.cookies);
-    perClickDisplay.textContent = gameState.perClick;
-    perSecondDisplay.textContent = gameState.perSecond;
+    cookieCountDisplay.textContent = formatNumber(Math.floor(gameState.cookies));
+    perClickDisplay.textContent = Math.floor(gameState.perClick * gameState.clickMultiplier);
+    perSecondDisplay.textContent = Math.floor(gameState.perSecond * gameState.clickMultiplier);
+    
+    // Update rebirth button
+    const rebirthButton = document.getElementById('rebirth-button');
+    if (rebirthButton) {
+        const requirement = getRebirthRequirement();
+        rebirthButton.disabled = gameState.cookies < requirement;
+    }
     
     // Update upgrade buttons
     gameState.upgrades.forEach(upgrade => {
@@ -297,7 +401,7 @@ function updateDisplay() {
 
 // Format Number with Commas
 function formatNumber(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 // Save/Load Game (localStorage)
@@ -312,6 +416,8 @@ function loadGame() {
         gameState.cookies = loaded.cookies;
         gameState.perClick = loaded.perClick;
         gameState.perSecond = loaded.perSecond;
+        gameState.rebirthCount = loaded.rebirthCount || 0;
+        gameState.clickMultiplier = loaded.clickMultiplier || 1;
         
         // Restore upgrades
         loaded.upgrades.forEach((loadedUpgrade, index) => {
