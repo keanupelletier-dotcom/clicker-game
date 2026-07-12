@@ -42,7 +42,7 @@ body {
 }
 
 .container {
-    max-width: 1000px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
     position: relative;
@@ -105,9 +105,19 @@ header h1 {
     font-weight: bold;
 }
 
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
 .game-area {
     text-align: center;
-    margin-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .cookie-container {
@@ -177,6 +187,8 @@ header h1 {
     padding: 25px;
     border-radius: 8px;
     border: 3px solid #8b7355;
+    max-height: 600px;
+    overflow-y: auto;
 }
 
 .upgrades-section h2 {
@@ -184,11 +196,16 @@ header h1 {
     margin-bottom: 20px;
     text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.7);
     text-align: center;
+    sticky: top;
+    position: sticky;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px 0;
+    z-index: 10;
 }
 
 .upgrades-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: 1fr;
     gap: 15px;
 }
 
@@ -224,11 +241,25 @@ header h1 {
     border-color: #3a3a3a;
 }
 
+.click-power-button {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
+    border-color: #c41e3a;
+}
+
+.click-power-button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #ff8787 0%, #ffa5a5 100%);
+}
+
+.click-power-button:disabled {
+    background: linear-gradient(135deg, #5a5a5a 0%, #6a6a6a 100%);
+}
+
 .upgrade-name {
     display: block;
     font-size: 1.1em;
     margin-bottom: 5px;
     color: #ffd700;
+    font-weight: bold;
 }
 
 .upgrade-description {
@@ -252,6 +283,12 @@ header h1 {
 }
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 768px) {
     header h1 {
         font-size: 2em;
@@ -266,6 +303,10 @@ header h1 {
     }
 
     .upgrades-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .main-content {
         grid-template-columns: 1fr;
     }
 }
@@ -291,4 +332,23 @@ header h1 {
     .upgrades-section {
         padding: 15px;
     }
+}
+
+/* Scrollbar styling for upgrades */
+.upgrades-section::-webkit-scrollbar {
+    width: 8px;
+}
+
+.upgrades-section::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+}
+
+.upgrades-section::-webkit-scrollbar-thumb {
+    background: #8b7355;
+    border-radius: 10px;
+}
+
+.upgrades-section::-webkit-scrollbar-thumb:hover {
+    background: #a0826d;
 }
