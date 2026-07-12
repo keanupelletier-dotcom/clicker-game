@@ -161,7 +161,7 @@ function getClickMultiplier() {
     if (gameState.rebirthCount === 0) {
         return 1;
     }
-    return gameState.rebirthCount + 1;
+    return gameState.rebirthCount * 5;
 }
 
 // Perform Rebirth
@@ -275,7 +275,7 @@ function renderUpgrades() {
     
     // Add Rebirth Button
     const rebirthRequirement = getRebirthRequirement();
-    const nextMultiplier = gameState.rebirthCount + 2;
+    const nextMultiplier = (gameState.rebirthCount + 1) * 5;
     const rebirthButton = document.createElement('button');
     rebirthButton.className = 'rebirth-button';
     rebirthButton.id = 'rebirth-button';
