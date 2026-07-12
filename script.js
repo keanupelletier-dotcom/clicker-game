@@ -156,6 +156,14 @@ function getRebirthRequirement() {
     return 25000 + (gameState.rebirthCount * 25000);
 }
 
+// Get multiplier based on rebirth count
+function getClickMultiplier() {
+    if (gameState.rebirthCount === 0) {
+        return 1;
+    }
+    return gameState.rebirthCount + 1;
+}
+
 // Perform Rebirth
 function rebirth() {
     const requirement = getRebirthRequirement();
@@ -168,7 +176,7 @@ function rebirth() {
         gameState.perClick = 1;
         gameState.perSecond = 0;
         gameState.rebirthCount += 1;
-        gameState.clickMultiplier += 0.25;
+        gameState.clickMultiplier = getClickMultiplier();
         
         // Reset all upgrades
         gameState.upgrades.forEach(upgrade => {
@@ -267,6 +275,7 @@ function renderUpgrades() {
     
     // Add Rebirth Button
     const rebirthRequirement = getRebirthRequirement();
+    const nextMultiplier = gameState.rebirthCount + 2;
     const rebirthButton = document.createElement('button');
     rebirthButton.className = 'rebirth-button';
     rebirthButton.id = 'rebirth-button';
@@ -276,9 +285,9 @@ function renderUpgrades() {
     
     rebirthButton.innerHTML = `
         <span class="upgrade-name">🔄 Rebirth</span>
-        <span class="upgrade-description">Reset progress for x${(gameState.clickMultiplier + 0.25).toFixed(2)} click multiplier</span>
+        <span class="upgrade-description">Reset progress for x${nextMultiplier} click multiplier</span>
         <span class="upgrade-cost">Cost: ${formatNumber(rebirthRequirement)} 🍪</span>
-        <span class="upgrade-owned">Rebirths: ${gameState.rebirthCount} | Current Multiplier: x${gameState.clickMultiplier.toFixed(2)}</span>
+        <span class="upgrade-owned">Rebirths: ${gameState.rebirthCount} | Current Multiplier: x${gameState.clickMultiplier}</span>
     `;
     
     rebirthButton.addEventListener('click', rebirth);
@@ -417,7 +426,7 @@ function loadGame() {
         gameState.perClick = loaded.perClick;
         gameState.perSecond = loaded.perSecond;
         gameState.rebirthCount = loaded.rebirthCount || 0;
-        gameState.clickMultiplier = loaded.clickMultiplier || 1;
+        gameState.clickMultiplier = getClickMultiplier();
         
         // Restore upgrades
         loaded.upgrades.forEach((loadedUpgrade, index) => {
