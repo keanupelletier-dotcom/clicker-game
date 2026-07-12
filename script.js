@@ -153,7 +153,7 @@ function setupEventListeners() {
 
 // Calculate rebirth requirement
 function getRebirthRequirement() {
-    return 250000 + (gameState.rebirthCount * 250000);
+    return 25000 + (gameState.rebirthCount * 25000);
 }
 
 // Perform Rebirth
