@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Cookie Clicker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="minecraft-background"></div>
+    
+    <div class="container">
+        <header>
+            <h1>🍪 Minecraft Cookie Clicker 🍪</h1>
+        </header>
+
+        <div class="stats-panel">
+            <div class="stat">
+                <span class="stat-label">Cookies:</span>
+                <span class="stat-value" id="cookieCount">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Per Click:</span>
+                <span class="stat-value" id="perClick">1</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Per Second:</span>
+                <span class="stat-value" id="perSecond">0</span>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="cookie-container">
+                <button id="cookieButton" class="cookie-button" title="Click me!">
+                    <span class="cookie">🍪</span>
+                </button>
+            </div>
+
+            <div class="cookie-particles" id="particleContainer"></div>
+        </div>
+
+        <div class="upgrades-section">
+            <h2>Upgrades</h2>
+            <div class="upgrades-grid" id="upgradesContainer">
+                <!-- Upgrades will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
